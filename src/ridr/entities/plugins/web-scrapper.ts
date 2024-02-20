@@ -1,3 +1,4 @@
+import { fetch, ResponseType } from "@tauri-apps/api/http";
 import type { PluginConfiguration, Plugin } from "@/ridr/types";
 
 export class WebScrapperPlugin {
@@ -5,8 +6,15 @@ export class WebScrapperPlugin {
 
 	async get(): Promise<Plugin> {
 		try {
-			const htmlText = await (await fetch(this.configuration.url)).text();
-			return this.getFeedContent(htmlText);
+			const response = await await fetch<string>(this.configuration.url, {
+				method: "GET",
+				responseType: ResponseType.Text,
+				headers: {
+					"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0",
+				},
+			});
+
+			return this.getFeedContent(response.data);
 		} catch (error: any) {
 			throw new Error(`Error while scraping URL: ${this.configuration.url}`);
 		}

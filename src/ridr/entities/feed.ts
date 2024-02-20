@@ -1,4 +1,5 @@
 import { Parser } from "xml2js";
+import { ResponseType, fetch } from "@tauri-apps/api/http";
 import { addZero } from "@/utilities/helpers";
 import type { Feed as TFeed, FeedConfiguration, FeedItem } from "../types";
 
@@ -19,18 +20,21 @@ export class Feed {
 		}
 
 		try {
-			const response = await fetch(archiveDate ? this.getArchivedFeedUrl(archiveDate) : this.configuration.url);
-
-			if (!response.ok) {
-				throw new Error(`Failed to fetch feed. Status: ${response.status} ${response.statusText}`);
-			}
-
-			const xmlString = await response.text();
+			const response = await fetch<string>(
+				archiveDate ? this.getArchivedFeedUrl(archiveDate) : this.configuration.url,
+				{
+					method: "GET",
+					responseType: ResponseType.Text,
+					headers: {
+						"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0",
+					},
+				}
+			);
 
 			return {
 				name: this.configuration.name,
 				url: this.configuration.url,
-				content: await this.mapXmlToContent(xmlString),
+				content: await this.mapXmlToContent(response.data),
 			};
 		} catch (error: any) {
 			throw new Error(`Error while fetching or processing feed: ${error.message}`);

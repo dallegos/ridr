@@ -1,24 +1,31 @@
-/* import RickAndMorty from "./rickandmorty"; */
+"use client";
+
+import { useEffect, useState } from "react";
 import RIDR from "@/ridr";
 import { Feed } from "@/components/feed";
 import { LaCapitalPlugin } from "@/ridr/entities";
+import type { Feed as TFeed, Plugin as TPlugin } from "@/ridr/types";
 
-export default async function Home() {
-	const ridr = new RIDR({
-		feeds: [
-			{ name: "Stack Overflow Blog", url: "https://stackoverflow.blog/feed/" },
-			{ name: "Dev Community", url: "https://dev.to/feed" },
-			{ name: "freeCodeCamp.org", url: "https://www.freecodecamp.org/news/rss" },
-		],
-		plugins: [
-			new LaCapitalPlugin({
-				name: "La Capital | Ultimo momento",
-				url: "https://www.lacapital.com.ar/secciones/ultimo-momento.html",
-			}),
-		],
-	});
+const ridr = new RIDR({
+	feeds: [
+		{ name: "Stack Overflow Blog", url: "https://stackoverflow.blog/feed/" },
+		{ name: "Dev Community", url: "https://dev.to/feed" },
+		{ name: "freeCodeCamp.org", url: "https://www.freecodecamp.org/news/rss" },
+	],
+	plugins: [
+		new LaCapitalPlugin({
+			name: "La Capital | Ultimo momento",
+			url: "https://www.lacapital.com.ar/secciones/ultimo-momento.html",
+		}),
+	],
+});
 
-	const feeds = await ridr.getFeedsData(new Date(new Date().setDate(new Date().getDate() - 365)));
+export default function Home() {
+	const [feeds, setFeeds] = useState<(TFeed | TPlugin)[]>([]);
+
+	useEffect(() => {
+		ridr.getFeedsData().then((_feeds) => setFeeds(_feeds));
+	}, []);
 
 	return (
 		<main>
